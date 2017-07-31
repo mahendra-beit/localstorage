@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+   <script language="JavaScript" type="text/javascript" src="js/jquery.dataTables-1.10.0.min.js"></script>
+    <link href="css/jquery.dataTables.min.css" rel="stylesheet" media="screen">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css">
+</head>
+	<title></title>
+	
+	<style type="text/css" media="screen">
+		.show-class{
+			display: block;
+		}
+		.hide-class{
+			display: none;
+		}	
+	</style>
+</head>
+<body onload="loadData()">
+<div class="container">
+	<header id="header" class="header top">
+		<div class="row">
+			<div class="col-md-6">
+			<h3> Student Information </h3>
+		
+		</div>
+		<div class="col-md-6">
+			<button type="button" class="btn btn-primary text-right" style="margin-top: 15px;padding-bottom: : 25px;float: right;"onclick="hideDiv()" >Add </button>
+		</div>
+		</div>
+	</header><!-- /header -->
+	<div class="rightbar" id="tableShow">	
+			<table id="student-info" class="display table-responsive table table-striped" cellspacing="0" width="100%" >
+				
+				<thead>
+					<tr >
+						<th>Roll Number</th>
+						<th>First Name</th>
+						<th>Last Name</th>						
+						<th>Subject</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody id="tablerows" onclick="showDiv()">					
+				</tbody>
+			</table>	
+			<div id="choose">
+			</div>
+	</div>
+	
+		
+	<div class="leftbar hide-class" id="infomationShow" >
+	<header id="header" class="header top">
+		<h1> New Registration </h1>
+	</header><!-- /header -->
+			<div class="">
+				<div class=" panel panel-default">
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-md-3">
+							<label for="rollnumber" class="form-label">Roll Number</label>
+							<input type="text" name="rollnum" id="rollnum" value="" placeholder="Roll Number" class="form-control">
+						</div>
+							<div class="col-md-3">
+							<label for="firstname" class="form-label">FirstName</label>
+							<input type="text" name="firstname" id="firstname" value="" placeholder="FirstName" class="form-control">
+						</div>		
+						<div class="col-md-3">
+							<label for="lastname" class="form-label" >LastName</label>
+							<input type="text" name="lastname" id="lastname" value="" placeholder="LastName" class="form-control">
+						</div>
+						
+						<div class="col-md-3">
+							<label for="subject" class="form-label">Subject</label>
+							<select name="subject"  id="subject" class="form-control">
+							<option value="Php">Php</option>
+							<option value="Java">Java</option>
+							<option value="Html">Html</option>
+							<option value="Css">Css</option>
+							</select>
+						</div>
+						</div>					
+					</div>
+					<div class="panel-footer">
+						<div class=" row">
+							<div class="col-md-6"><button id="clear" onclick="clearData()" class="btn btn-block btn-danger">Clear</button>
+							</div>
+							<div class="col-md-6"><button id="submit" onclick="insertData()" class="btn  btn-block btn-primary">Register</button></div>
+						</div>									
+					</div>
+			</div>
+		<footer class="headerbar bottom">		
+		</footer>
+		</div>
+		<script type="text/javascript">
+
+		var studentArray = [];
+		// Default Load Data
+		function loadData(){			
+			document.getElementById("tablerows").innerHTML = "";
+			if(localStorage.studentRecord){
+				studentArray = JSON.parse(localStorage.studentRecord);				
+				for(var i=0; i < studentArray.length; i++){
+					createTableCell(i,studentArray[i].rollnum,studentArray[i].firstname,studentArray[i].lastname,studentArray[i].subject)
+				}   
+			}else{
+				alert("Data Not Found");
+			}
+		}
+
+		// Insert Data 
+
+		function insertData(){		
+			location.reload();
+			var rollNum 	= document.getElementById('rollnum').value;
+			var firstName 	= document.getElementById('firstname').value;
+			var lastName 	= document.getElementById('lastname').value;		
+			var subject 	= document.getElementById('subject').value;
+			var stuObj = {rollnum:rollNum,firstname:firstName,lastname:lastName,subject:subject};
+			if(selectedIndex  === -1){
+				studentArray.push(stuObj);
+			}else{
+				studentArray.splice(selectedIndex,1,stuObj);
+			}		
+
+			// Create local storeag Record	
+			localStorage.studentRecord = JSON.stringify(studentArray);
+			loadData();
+			clearData();
+		}
+
+		function  createTableCell(index,rollNum,firstName,lastName,subject){
+			var table =document.getElementById("tablerows");
+			var row = table.insertRow();
+			var rollNumCell = row.insertCell(0);
+			var firstNameCell= row.insertCell(1);
+			var lastNameCell= row.insertCell(2);			
+			var subjectCell= row.insertCell(3);
+			var actionCell= row.insertCell(4);	
+
+			rollNumCell.innerHTML 		= 	rollNum;
+			firstNameCell.innerHTML 	= 	firstName;
+			lastNameCell.innerHTML 		=	lastName;			 
+			subjectCell.innerHTML	 	=	subject;
+			actionCell.innerHTML		= 	'<button type="button" class="btn btn-primary" onclick="editRow('+index+')">Edit</button>&nbsp;&nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-primary" onclick="deleteRow('+index+')">Delete</button>';
+
+		}
+
+		function deleteRow(index){
+			selectedIndex  = -1;
+			/*var table = document.getElementById("regtable");
+			table.deleteRow(index+1);*/
+			studentArray.splice(index,1);
+			localStorage.studentRecord = JSON.stringify(studentArray);
+			loadData();
+		}
+		var selectedIndex = -1;
+
+		function editRow(index){
+			selectedIndex  = index
+			var stuObj = studentArray[index];
+			document.getElementById('rollnum').value= stuObj.rollnum;
+			document.getElementById('firstname').value = stuObj.firstname;
+			document.getElementById('lastname').value= stuObj.lastname;			
+			document.getElementById('subject').value= stuObj.subject;
+			document.getElementById('submit').innerHTML="Update";
+
+
+		}
+		function clearData(){
+			document.getElementById("rollnum").value="";
+			document.getElementById("firstname").value="";
+			document.getElementById("lastname").value="";			
+			document.getElementById("subject").value="Php";
+			document.getElementById('submit').innerHTML="Register";
+		}
+		function showDiv(){
+			document.getElementById("infomationShow").classList.remove('hide-class');
+			document.getElementById("tableShow").classList.add('hide-class');
+		}
+		function hideDiv(){
+			document.getElementById("tableShow").classList.add('hide-class');
+			document.getElementById("infomationShow").classList.add('show-class');
+			document.getElementById("infomationShow").classList.remove('hide-class');
+		}
+		$(document).ready(function() {
+		    $('#student-info').DataTable();
+		} );
+		
+	</script>
+	</body>
+</html>
